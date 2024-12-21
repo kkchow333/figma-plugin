@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Preview and Apply</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            width: 100%;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: white;
+        }
+        #preview-box {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #ddd;
+            margin-bottom: 20px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 12px;
+        }
+        #shuffleButton {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            background: #000000;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #applyButton {
+            flex: 1;
+            height: 40px;
+            padding: 0 16px;
+            border-radius: 8px;
+            background: #000000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        #shuffleButton:hover,
+        #applyButton:hover {
+            background-color: #333333;
+        }
+        .dropdown {
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            border: 1px solid #E6E6E6;
+            border-radius: 8px;
+            background-color: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%23999999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            font-size: 14px;
+            color: #333333;
+            cursor: pointer;
+        }
+
+        .dropdown:hover {
+            border-color: #CCCCCC;
+        }
+
+        .dropdown:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        #preview-box.loading {
+            background: linear-gradient(90deg, #e0e0e0 0%, #f5f5f5 50%, #e0e0e0 100%);
+            background-size: 200% 100%;
+            animation: pulse 2s ease-in-out infinite;
+            position: relative;
+        }
+
+        @keyframes pulse {
+            0% {
+                background-position: 100% 50%;
+                opacity: 0.6;
+            }
+            50% {
+                background-position: 0% 50%;
+                opacity: 1;
+            }
+            100% {
+                background-position: 100% 50%;
+                opacity: 0.6;
+            }
+        }
+
+        #preview-box.loading::after {
+            content: 'Loading...';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <select class="dropdown" id="dropdownId" style="margin-bottom: 20px;">
+        <option value="typography">Typography</option>
+        <option value="hierarchy">Hierarchy</option>
+        <option value="spacing">Spacing</option>
+        <option value="contrast">Contrast</option>
+        <!-- Add more options as needed -->
+    </select>
+
+    <div id="preview-box" style="width: 100%; height: 400px; display: flex; align-items: center; justify-content: center; background: #ddd; margin-bottom: 20px;">
+        <img id="preview-image" style="max-width: 90%; max-height: 90%; object-fit: contain;">
+    </div>
+
+    <div class="button-container">
+        <button id="shuffleButton">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" 
+                      clip-rule="evenodd" 
+                      d="M10.7663 9.52375L6.23375 5L5 6.23375L9.52375 10.7575L10.7663 9.52375ZM14.1875 5L15.9725 6.785L5 17.7663L6.23375 19L17.215 8.0275L19 9.8125V5H14.1875ZM13.2425 14.4675L14.4763 13.2337L17.215 15.9725L19 14.1875V19H14.1875L15.9813 17.2062L13.2425 14.4675Z" 
+                      fill="#ffffff">
+                </path>
+            </svg>
+        </button>
+        <button id="applyButton">Apply</button>
+    </div>
+
+    <div id="preview-container"></div>
+
+    <script>
+        // First, declare all constants and variables
+        const shapes = {
+            typography: ['star', 'circle', 'triangle'],
+            hierarchy: ['hier1', 'hier2', 'hier3'],
+            spacing: ['space1', 'space2', 'space3'],
+            contrast: ['contrast1', 'contrast2', 'contrast3']
+        };
+
+        const shapeImages = {
+            circle: "https://github.com/kkchow333/Design-Drills/blob/main/circle.png?raw=true",
+            triangle: "https://github.com/kkchow333/Design-Drills/blob/main/triangle.png?raw=true",
+            star: "https://github.com/kkchow333/Design-Drills/blob/main/star.png?raw=true",
+            hier1: "https://github.com/kkchow333/Design-Drills/blob/main/hier1.png?raw=true",
+            hier2: "https://github.com/kkchow333/Design-Drills/blob/main/hier2.png?raw=true",
+            hier3: "https://github.com/kkchow333/Design-Drills/blob/main/hier3.png?raw=true",
+            space1: "https://github.com/kkchow333/Design-Drills/blob/main/space1.png?raw=true",
+            space2: "https://github.com/kkchow333/Design-Drills/blob/main/space2.png?raw=true",
+            space3: "https://github.com/kkchow333/Design-Drills/blob/main/space3.png?raw=true",
+            contrast1: "https://github.com/kkchow333/Design-Drills/blob/main/contrast1.png?raw=true",
+            contrast2: "https://github.com/kkchow333/Design-Drills/blob/main/contrast2.png?raw=true",
+            contrast3: "https://github.com/kkchow333/Design-Drills/blob/main/contrast3.png?raw=true"
+        };
+
+        let currentShape = ''; // Track the current shape
+        const dropdown = document.getElementById('dropdownId');
+
+        // Then define functions
+        function updatePreview() {
+            try {
+                const previewImage = document.getElementById('preview-image');
+                const previewBox = document.getElementById('preview-box');
+                
+                if (!previewImage) return;
+                
+                // Show loading state
+                previewBox.classList.add('loading');
+                
+                previewImage.onload = () => {
+                    previewBox.classList.remove('loading');
+                };
+                
+                previewImage.src = shapeImages[currentShape];
+                previewImage.alt = currentShape;
+                previewImage.style.maxWidth = '80%';
+                previewImage.style.maxHeight = '80%';
+            } catch (error) {
+                console.error("Error in updatePreview:", error);
+            }
+        }
+
+        function initializeShape() {
+            try {
+                const selectedSet = dropdown.value;
+                currentShape = shapes[selectedSet][0];
+                console.log("Initializing shape:", currentShape);
+                updatePreview();
+            } catch (error) {
+                console.error("Error in initializeShape:", error);
+            }
+        }
+
+        dropdown.addEventListener('change', initializeShape);
+        
+        document.getElementById('shuffleButton').onclick = () => {
+            const selectedSet = dropdown.value;
+            const currentShapes = shapes[selectedSet];
+            const currentIndex = currentShapes.indexOf(currentShape);
+            // Move to next shape, or back to first if at end
+            const nextIndex = (currentIndex + 1) % currentShapes.length;
+            currentShape = currentShapes[nextIndex];
+            updatePreview();
+        };
+
+        document.getElementById('applyButton').onclick = () => {
+            console.log("Dropdown value in UI:", dropdown.value);
+            console.log("Current shape in UI:", currentShape);
+
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'apply-shape',
+                    dropdown: dropdown.value,
+                    shape: currentShape
+                }
+            }, '*');
+        };
+
+        initializeShape(); // Initialize with first shape
+
+        // Add this right after your shapes declaration to verify the data
+        console.log("Available shapes:", shapes);
+
+        onmessage = (event) => {
+            if (event.data.pluginMessage.type === 'update-preview') {
+                const previewContainer = document.getElementById('preview-container');
+                previewContainer.innerHTML = '';
+                
+                const img = document.createElement('img');
+                img.src = event.data.pluginMessage.imageUrl;
+                img.style.width = '100%';
+                img.style.height = 'auto';
+                img.style.objectFit = 'contain';
+                
+                previewContainer.appendChild(img);
+            }
+        };
+
+        // Preload images when plugin starts
+        function preloadImages() {
+            Object.values(shapeImages).forEach(url => {
+                const img = new Image();
+                img.src = url;
+            });
+        }
+
+        // Call this when plugin initializes
+        preloadImages();
+    </script>
+
+</body>
+</html>

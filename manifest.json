@@ -1,0 +1,19 @@
+{
+  "name": "Design Drills Final",
+  "id": "1447059165200119590",
+  "api": "1.0.0",
+  "main": "code.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "documentAccess": "dynamic-page",
+  "editorType": [
+    "figma"
+  ],
+  "ui": "ui.html",
+  "networkAccess": {
+    "allowedDomains": [
+      "https://raw.githubusercontent.com",
+      "https://github.com"
+    ]
+  }
+}
